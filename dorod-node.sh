@@ -167,9 +167,17 @@ load_meta(){ [ -f "$META_FILE" ] && . "$META_FILE" 2>/dev/null || true; }
 # ============================================================================
 cmd_install(){
   need_root
+  banner
+  # Интерактив: если запущено в терминале и значения не переданы — спросить.
+  # Так команда установки короткая (bash node.sh install), длинную строку вставлять не надо.
+  if [ -t 0 ]; then
+    [ -z "$SECRET_KEY" ] && { printf '  SECRET_KEY (из панели): '; read -r SECRET_KEY; }
+    [ -z "$PANEL_IP" ]   && { printf '  IP панели: '; read -r PANEL_IP; }
+    printf '  NODE_PORT [%s]: ' "$NODE_PORT"; read -r _np; [ -n "${_np:-}" ] && NODE_PORT="$_np"
+    [ -z "$LOCATION" ] && { printf '  LOCATION (de/us/nl, можно пусто): '; read -r LOCATION; }
+  fi
   : "${SECRET_KEY:?нужен SECRET_KEY из панели (одинаковый для всех нод)}"
   : "${PANEL_IP:?нужен PANEL_IP (для firewall NODE_PORT)}"
-  banner
   step "INSTALL · location=${LOCATION:-?} provider=${PROVIDER:-?} node_port=${NODE_PORT}"
 
   step "1/7 пакеты + синхронизация времени (критично для Reality/TLS)"

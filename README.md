@@ -1,66 +1,60 @@
 # 🚀 Установка ноды DOROD TECH
 
-Нужно всего три вещи:
-- **IP сервера** (от хостера)
-- **root-пароль** (от хостера)
-- **SECRET_KEY** (из панели: Nodes → создать ноду → «Copy docker-compose.yml» → строка `SECRET_KEY=...`)
+Нужно: **IP сервера** + **root-пароль** (от хостера) + **SECRET_KEY** (из панели: Nodes → создать ноду → «Copy docker-compose.yml» → строка `SECRET_KEY=...`).
 
-Ключи, SSH-config, имена — **не нужны**. Всё делается на самом сервере.
+Всё делается на сервере. Команды короткие — вставляются без проблем.
 
 ---
 
 ## Шаг 1 — зайти на сервер
-
 ```bash
 ssh root@ВАШ_IP
 ```
-Введите root-пароль от хостера.
+Введите root-пароль.
 
 ---
 
-## Шаг 2 — вставить ОДНУ команду
-
-Подставьте свой `SECRET_KEY` и выполните **на сервере**:
-
+## Шаг 2 — скачать установщик
 ```bash
-SECRET_KEY='ВАШ_КЛЮЧ' PANEL_IP=IP_ПАНЕЛИ NODE_PORT=6767 LOCATION=de bash <(curl -fsSL https://raw.githubusercontent.com/Vodorod77/dorod-node/main/dorod-node.sh) install
+curl -fsSL https://raw.githubusercontent.com/Vodorod77/dorod-node/main/dorod-node.sh -o node.sh
 ```
 
-Пойдёт установка (баннер DOROD TECH + 7 шагов).
-✅ В конце: `контейнер: Up`, `NODE_PORT 6767 слушается`.
-
-> `LOCATION=de` — метка (de/us/nl), можно менять или убрать.
-
----
-
-## Шаг 3 — добавить ноду в панель (браузер)
-
-Nodes → **Add**:
-- Address = `ВАШ_IP`
-- Port = `6767`
-- Config Profile = **тот же, что у других нод**
-- Create
-
----
-
-## Шаг 4 — проверить
-
-На сервере:
+## Шаг 3 — запустить установку
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Vodorod77/dorod-node/main/dorod-node.sh) doctor
+bash node.sh install
 ```
-- 🟢 **В СТРОЮ** — готово 🎉
-- 🟠 **НЕ В СТРОЮ** — проверьте Шаг 3
+Установщик **сам спросит** SECRET_KEY, IP панели и порт — вводите/вставляете по одному короткому значению. Длинные строки вставлять не надо.
+
+✅ В конце: `контейнер: Up`, `NODE_PORT слушается`.
 
 ---
 
-## Ещё сервер?
-Повторите Шаги 1–4 на новом сервере. `SECRET_KEY` тот же.
+## Шаг 4 — добавить ноду в панель (браузер)
+Nodes → **Add**: Address = `ВАШ_IP`, Port = тот что вводили (по умолч. `6767`), Config Profile = **тот же, что у других нод** → Create.
 
-## Если что-то барахлит (на сервере)
+---
+
+## Шаг 5 — проверить
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/Vodorod77/dorod-node/main/dorod-node.sh) doctor --apply   # осмотр + починка
-docker logs remnanode --tail 30                                             # логи ноды
+bash node.sh doctor
 ```
+🟢 **В СТРОЮ** — готово 🎉 · 🟠 **НЕ В СТРОЮ** — проверьте Шаг 4.
+
+---
+
+## Ещё сервер? Повторите Шаги 1–5. `SECRET_KEY` тот же.
+
+## Если барахлит
+```bash
+bash node.sh doctor --apply        # осмотр + починка
+docker logs remnanode --tail 30    # логи ноды
+```
+
+## Ошибки
+| Ошибка | Фикс |
+|--------|------|
+| `Too many authentication failures` при входе | `ssh -o IdentitiesOnly=yes -i ~/.ssh/КЛЮЧ root@IP` |
+| команда «обрубается» / виснет | не вставляйте длинные строки — Шаги 2–3 короткие |
+| нода 🟠 не в строю | не добавлена в панель (Шаг 4) |
 
 _by vodorod · Dorod Tech_
